@@ -1,21 +1,19 @@
-cimport { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { LZ } from '../lib/lz';
 
-type MultiPayload = { ads: any[] };
+const lines = (v) => v.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
 
-const lines = (v:string) => v.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
-
-function parseBlock(txt:string){
-  const get = (label:string) => {
-    const m = txt.match(new RegExp(`^${label}\s*:\s*([\\s\\S]*?)(?:\n[A-Z][^:\n]*:|$)`,'mi'));
+function parseBlock(txt){
+  const get = (label) => {
+    const m = txt.match(new RegExp(`^${label}\\s*:\\s*([\\s\\S]*?)(?:\\n[A-Z][^:\\n]*:|$)`,'mi'));
     return m ? m[1].trim() : '';
   };
-  const out:any = { title:'', q:'', dm:'', u:'', p1:'', p2:'', h:[], d:[], c:[], msv:[] };
+  const out = { title:'', q:'', dm:'', u:'', p1:'', p2:'', h:[], d:[], c:[], msv:[] };
   out.title = get('Title');
   out.q     = get('Search');
-  out.dm    = get('Domain').replace(/^https?:\/\//,'').replace(/^www\./,''); // display domain
-  out.u     = get('URL'); // optional explicit
+  out.dm    = get('Domain').replace(/^https?:\/\//,'').replace(/^www\./,'');
+  out.u     = get('URL');
   const paths = get('Paths');
   if (paths.includes('|')) { const [a,b]=paths.split('|').map(s=>s.trim()); out.p1=a||''; out.p2=b||''; }
   else if (paths) out.p1=paths.trim();
@@ -29,20 +27,20 @@ function parseBlock(txt:string){
     if(!sn) continue;
     const arr = lines(sn);
     if(!arr.length) continue;
-    const header = arr.shift()!;
+    const header = arr.shift();
     out.msv.push({ h: header, v: arr });
   }
   return out;
 }
 
-function splitBlocks(raw:string){
+function splitBlocks(raw){
   return raw.split(/\n-{3,}\n|(?=^Title\s*:)/gmi).map(s=>s.trim()).filter(Boolean);
 }
 
 export default function Home(){
   const [bulk, setBulk] = useState('');
 
-  const payload: MultiPayload = useMemo(()=>{
+  const payload = useMemo(()=>{
     const blocks = splitBlocks(bulk);
     const ads = blocks.map(parseBlock).filter(a => (a.h?.length || a.d?.length));
     return { ads };
@@ -96,4 +94,3 @@ Parking
     </div>
   );
 }
-
