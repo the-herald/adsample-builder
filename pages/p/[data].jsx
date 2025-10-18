@@ -4,9 +4,7 @@ import Link from 'next/link';
 import { LZ } from '../../lib/lz';
 import { SerpDual } from '../../components/SerpAd';
 
-type Payload = { ads?: any[] };
-
-function decode(raw?: string): Payload {
+function decode(raw){
   if (!raw) return {};
   try {
     const j = LZ.decompressFromEncodedURIComponent(raw);
@@ -20,7 +18,7 @@ export default function Preview(){
   const { query } = useRouter();
   const [idx, setIdx] = useState(0);
 
-  const P = useMemo(()=>decode(query.data as string), [query.data]);
+  const P = useMemo(()=>decode(query.data), [query.data]);
   const ads = P.ads || [];
   const ad  = ads[idx] || {};
 
@@ -49,16 +47,16 @@ export default function Preview(){
         <div className="hsplit">
           <div>
             <h3>Headlines</h3>
-            <ul>{(ad.h||[]).map((x:string,i:number)=><li key={i}>{x}</li>)}</ul>
+            <ul>{(ad.h||[]).map((x,i)=><li key={i}>{x}</li>)}</ul>
 
             <h3>Descriptions</h3>
-            <ul>{(ad.d||[]).map((x:string,i:number)=><li key={i}>{x}</li>)}</ul>
+            <ul>{(ad.d||[]).map((x,i)=><li key={i}>{x}</li>)}</ul>
 
             <h3>Callouts</h3>
-            <ul>{(ad.c||[]).map((x:string,i:number)=><li key={i}>{x}</li>)}</ul>
+            <ul>{(ad.c||[]).map((x,i)=><li key={i}>{x}</li>)}</ul>
 
             <h3>Structured Snippets</h3>
-            {(ad.msv||[]).map((s:any,i:number)=>(
+            {(ad.msv||[]).map((s,i)=>(
               <div key={i}><b>{s.h}:</b> <span className="mono">{(s.v||[]).join(' · ')}</span></div>
             ))}
 
@@ -83,4 +81,3 @@ export default function Preview(){
     </div>
   );
 }
-
